@@ -24,22 +24,10 @@ namespace AirHockey
     {
         //Size 4-1/16" diam.
         public Vector2 position;
-        public Vector2 oldPosition;
         public Vector2 velocity;
+
         public int score;
     }
-
-    class Table
-        //Size 8'x4'
-
-    {   // centered at 0,0
-        public float width;
-        public float height;
-        public float elasticity;
-    }
-
-
-
 
     public enum GameState
     {
@@ -60,43 +48,30 @@ namespace AirHockey
         float viewWidth;
         float viewHeight;
 
-        int[] numberTextures;
+        const String mediaPath = "..\\..\\media\\";
 
         Animation readyGoAnimation;
-
+        Animation newGameAnimation;
         Animation winAnimation;
         Animation loseAnimation;
 
         StartMenu startMenu;
         GameOverMenu gameOverMenu;
 
-        float paddleRadius;
-        float puckRadius;
+        Networking networking;
 
-        float drag;
-
-        const String mediaPath = "..\\..\\media\\";
+        Physics physics;
+        AI ai;
 
         ISoundEngine soundEngine;
 
         Renderer renderer;
         Puck puck;
         Paddle[] paddles;
-        Table table;
-        float maxPuckSpeed;
-        float paddleElasticity;
-        float goalWidth;
 
         GameState gameState;
 
         int tableTexture;
-
-        float centerLineOverlap; // as a fraction of the paddle radius
-
-        Animation newGameAnimation;
-        Physics physics;
-
-        AI ai;
 
         public AppWindow()
             : base(640/2, 1136/2)
@@ -105,7 +80,6 @@ namespace AirHockey
             viewHeight = 9.0f;
             puck = new Puck();
             puck.position = new Vector2(0.0f, 0.0f);
-            puckRadius = 3.25f/12.0f; // 3.25 inches
             puck.velocity = new Vector2(0, 0);
 
             paddles = new Paddle[2];
@@ -113,35 +87,27 @@ namespace AirHockey
             paddles[1] = new Paddle();
             paddles[0].position = new Vector2(0.0f, -0.7f);
             paddles[1].position = new Vector2(0.0f, 0.7f);
-            paddleRadius =  (4.0f + 1.0f/16.0f) / 12.0f; // 4 1/16 inches
 
-            ai = new AI();
 
             renderer = new Renderer();
             renderer.Viewport(Width, Height);
             renderer.OrthoCentered(viewWidth, viewHeight);
 
-            table = new Table();
-            table.width = 4.0f; // 8x4 feet
-            table.height = 8.0f;
-            table.elasticity = 0.9f;
-
-            paddleElasticity = 0.9f;
-            
-            maxPuckSpeed = 16.0f;
-            drag = 0.99f;
-
-            goalWidth = table.width / 2.0f;
-
-            centerLineOverlap = 0.8f;
-
             startMenu = new StartMenu(renderer, this);
             gameOverMenu = new GameOverMenu(renderer, this);
 
+            ai = new AI();
 
             physics = new Physics();
 
             soundEngine = new ISoundEngine();
+
+            networking = new Networking(paddles);
+            //networking.InitializeReceiver();
+            //networking.InitializeSender();
+            networking.StartBroadcast();
+
+            networking.UpdateReceiver = ReceiveUpdate;
             
         }
 
@@ -170,7 +136,7 @@ namespace AirHockey
         {
             tableTexture = renderer.CreateTextureFromFile("Table.png");
 
-            OpenTK.Box2 box = new OpenTK.Box2(new OpenTK.Vector2(-table.width * 0.5f, table.height * 0.5f), new OpenTK.Vector2(table.width * 0.5f, -table.height * 0.5f));
+            OpenTK.Box2 box = new OpenTK.Box2(new OpenTK.Vector2(-Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f), new OpenTK.Vector2(Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f));
             readyGoAnimation = new Animation();
             readyGoAnimation.AddFrame(renderer.CreateTextureFromFile("ready.png"), 0.3f, box );
             readyGoAnimation.AddFrame(renderer.CreateTextureFromFile("go.png"), 0.2f, box);
@@ -195,34 +161,36 @@ namespace AirHockey
 
         void DrawPuck()
         {
-            renderer.DrawCircle(puck.position, puckRadius, new Color4(1, 1, 0, 1), new Color4(1, 0, 1, 0));
+            renderer.DrawCircle(puck.position, Constants.puckRadius, new Color4(1, 1, 0, 1), new Color4(1, 0, 1, 0));
         }
         void DrawPaddle(int player)
         {
-            renderer.DrawCircle(paddles[player].position, paddleRadius, new Color4(1, 0, 0, 1), new Color4(1, 1, 1, 0));
+            renderer.DrawCircle(paddles[player].position, Constants.paddleRadius, new Color4(1, 0, 0, 1), new Color4(1, 1, 1, 0));
         }
 
         void DrawTable()
         {
-            renderer.DrawTexturedQuad(tableTexture, new OpenTK.Box2(new OpenTK.Vector2(-table.width * 0.5f, table.height * 0.5f), new OpenTK.Vector2(table.width * 0.5f, -table.height * 0.5f)));
+            renderer.DrawTexturedQuad(tableTexture, new OpenTK.Box2(new OpenTK.Vector2(-Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f), new OpenTK.Vector2(Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f)));
 
-            Vector2 tl = new Vector2(-table.width * 0.5f, table.height * 0.5f);
-            Vector2 tr = new Vector2(table.width * 0.5f, table.height * 0.5f);
-            Vector2 bl = new Vector2(-table.width * 0.5f, -table.height * 0.5f);
-            Vector2 br = new Vector2(table.width * 0.5f, -table.height * 0.5f);
+            Vector2 tl = new Vector2(-Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f);
+            Vector2 tr = new Vector2(Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f);
+            Vector2 bl = new Vector2(-Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f);
+            Vector2 br = new Vector2(Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f);
 
             renderer.DrawLine(tl, tr, new Color4(1, 0, 0, 1));
             renderer.DrawLine(tr, br, new Color4(1, 0, 0, 1));
             renderer.DrawLine(br, bl, new Color4(1, 0, 0, 1));
             renderer.DrawLine(bl, tl, new Color4(1, 0, 0, 1));
 
-            renderer.DrawLine(new Vector2(-goalWidth * 0.5f, table.height * 0.5f), new Vector2(goalWidth * 0.5f, table.height * 0.5f), new Color4(1, 0, 1, 1));
-            renderer.DrawLine(new Vector2(-goalWidth * 0.5f, -table.height * 0.5f), new Vector2(goalWidth * 0.5f, -table.height * 0.5f), new Color4(1, 0, 1, 1));
-            renderer.DrawLine(new Vector2(-table.width * 0.5f, 0), new Vector2(table.width * 0.5f, 0), new Color4(1, 0, 0, 1));
+            renderer.DrawLine(new Vector2(-Constants.goalWidth * 0.5f, Constants.tableHeight * 0.5f), new Vector2(Constants.goalWidth * 0.5f, Constants.tableHeight * 0.5f), new Color4(1, 0, 1, 1));
+            renderer.DrawLine(new Vector2(-Constants.goalWidth * 0.5f, -Constants.tableHeight * 0.5f), new Vector2(Constants.goalWidth * 0.5f, -Constants.tableHeight * 0.5f), new Color4(1, 0, 1, 1));
+            renderer.DrawLine(new Vector2(-Constants.tableWidth * 0.5f, 0), new Vector2(Constants.tableWidth * 0.5f, 0), new Color4(1, 0, 0, 1));
         }
 
         protected override void OnRenderFrame(float deltaTime)
         {
+
+
             renderer.Clear();
 
             if (gameState == GameState.Menu)
@@ -255,30 +223,7 @@ namespace AirHockey
         }
 
 
-        Vector2 ClampPaddlePosition(int player) //player 0 is on bottom, player 1 on top 
-        {
-            Vector2 position = paddles[player].position;
-            float radius = paddleRadius;
 
-            if (player == 0)
-                if (position.Y - radius * centerLineOverlap > 0)
-                    position.Y = radius * centerLineOverlap;
-            if (player == 1)
-                if (position.Y + radius * centerLineOverlap < 0)
-                    position.Y = -radius * centerLineOverlap;
-
-            if (position.X + radius > table.width * 0.5f)
-                position.X = table.width * 0.5f - radius;
-            if (position.X - radius < -table.width * 0.5f)
-                position.X = -table.width * 0.5f + radius;
-
-            if (position.Y + radius> table.height * 0.5f)
-                position.Y = table.height * 0.5f - radius;
-            if (position.Y - radius < -table.height * 0.5f)
-                position.Y = -table.height * 0.5f + radius;
-
-            return position;
-        }
 
         public Vector2 ClientToView(int x, int y)
         {
@@ -333,31 +278,30 @@ namespace AirHockey
             {
                 PlayGame(deltaTime);
             }
+
+        }
+
+        void ReceiveUpdate(int player, Vector2 position, Vector2 velocity)
+        {
+            paddles[player].position = position;
+            paddles[player].velocity = velocity;
         }
 
         void PlayGame(float deltaTime)
         {
-            //careful, changing the order of intergrations can break things 
-            paddles[0].oldPosition = paddles[0].position;
-            paddles[0].position = ClientToView(MouseX, MouseY);
-            paddles[0].position = ClampPaddlePosition(0);
-            paddles[0].velocity = (paddles[0].position - paddles[0].oldPosition) / deltaTime;
+            int player = -1;
 
-            ai.Update(deltaTime, table, puck.position, puckRadius, paddleRadius);
+            ai.Update(deltaTime, puck, paddles[1]);
 
-            paddles[1].position = ai.position;
-            paddles[1].velocity = ai.velocity;
+            paddles[0].velocity = (ClientToView(MouseX, MouseY) - paddles[0].position) / deltaTime;
 
-            paddles[1].position = ClampPaddlePosition(1);
+            player = physics.Update(puck, paddles, deltaTime);
 
-            physics.DoPaddleCollision(0, puck, puckRadius, paddles, paddleRadius, paddleElasticity, maxPuckSpeed, ai);
-            physics.DoPaddleCollision(1, puck, puckRadius, paddles, paddleRadius, paddleElasticity, maxPuckSpeed, ai);
+            puck.velocity *= Constants.puckDrag;
 
-            puck.velocity *= drag;
+            networking.SendUpdate(0, paddles[0]);
+            
 
-            puck.position = puck.position + puck.velocity * deltaTime;
-
-            int player = physics.DoTableCollision(puck, puckRadius, table, goalWidth);
 
             if (player != -1)
             {

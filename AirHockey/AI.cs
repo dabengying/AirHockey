@@ -11,28 +11,29 @@ namespace AirHockey
     {
         enum AIState
         {
+            MoveToAttackPosition,
             Attack,
             Defense
         }
 
         public AI()
         {
-            speed = 10.0f;
+            speed = 8.0f;
             state = AIState.Defense;
         }
 
-        public void Update(float deltaTime, Table table, Vector2 puckPosition, float puckRadius, float paddleRadius)
+        public void Update(float deltaTime, Puck puck, Paddle paddle)
         {
             thinkTimer += deltaTime;
             if (thinkTimer > 0.4)
             {
                 thinkTimer = 0.0f;
 
-                if (puckPosition.Y < 0) // puck is on player side, move towards defensive position(close to goal).
+                if (puck.position.Y < 0) // puck is on player side, move towards defensive position(close to goal).
                     state = AIState.Defense;
                 // else if (puck.velocity.Y < 0)
                 //     aiState = AIState.Defense;
-                // else if ((puck.position - paddles[1].position).Y + puckRadius + paddleRadius > 0)
+                // else if ((puck.position - paddles[1].position).Y + Constants.puckRadius + Constants.paddleRadius > 0)
                 //     aiState = AIState.Defense;
                 else
                     state = AIState.Attack;
@@ -42,27 +43,25 @@ namespace AirHockey
 
             if (state == AIState.Defense)
             {
-                target = new Vector2(0, 0.4f * table.height);
-                target.X += puckPosition.X;
+                target = new Vector2(0, 0.4f * Constants.tableHeight);
+                target.X += puck.position.X;
             }
             else
             {
-                target = puckPosition + new Vector2(0, puckRadius * 0.6f); // try to hit near the top but a little inside
+                target = puck.position + new Vector2(0, Constants.puckRadius * 0.6f); // try to hit near the top but a little inside
             }
 
-            trajectory = target - position;
+            trajectory = target - paddle.position;
             trajectory.Normalize();
 
-            velocity = trajectory * speed;
+            paddle.velocity = trajectory * speed;
 
 
             // don't overshoot target
-            if (speed * deltaTime > (target - position).GetLength() - puckRadius - paddleRadius && state == AIState.Defense)
+            if (speed * deltaTime > (target - paddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius && state == AIState.Defense)
             { //TODO: this is wrong, the impulse should not be small when we are really close...
-                velocity = trajectory * ((target - position).GetLength() - puckRadius - paddleRadius) / deltaTime;
+                paddle.velocity = trajectory * ((target - paddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius) / deltaTime;
             }
-
-            position += velocity * deltaTime;
         }
 
         public void PuckCollision()
@@ -73,10 +72,6 @@ namespace AirHockey
                 thinkTimer = 0.0f;
             }
         }
-
-
-        public Vector2 position;
-        public Vector2 velocity;
 
         AIState state;
         float thinkTimer;

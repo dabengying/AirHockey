@@ -127,6 +127,7 @@ namespace AirHockey
 
         bool press;
     }
+
     class StartMenu
     {
         public StartMenu(Renderer renderer, AppWindow app)

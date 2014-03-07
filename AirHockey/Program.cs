@@ -12,7 +12,6 @@ using OpenTK.Input;
 
 namespace AirHockey
 {
-    //puck integrates velocity to get new position, paddle differentiates position to get new velocity 
     class Puck
     {
         //Size 3.25" diam.
@@ -102,7 +101,7 @@ namespace AirHockey
 
             soundEngine = new ISoundEngine();
 
-           // networking = new Networking(paddles);
+            networking = new Networking(paddles);
             //networking.InitializeReceiver();
             //networking.InitializeSender();
             //networking.StartBroadcast();
@@ -303,14 +302,13 @@ namespace AirHockey
 
             if (result == PhysicsResult.PuckPaddleCollision)
             {
-                System.Console.WriteLine("hit paddle");
                 soundEngine.Play2D(mediaPath + "puckHitPaddle.wav");
             }
             if (result == PhysicsResult.PuckTableCollision)
             {
-                System.Console.WriteLine("hit table");
                 soundEngine.Play2D(mediaPath + "puckHitWall.wav");
             }
+
             if (result == PhysicsResult.BottomPlayerScores)
                 player = 0;
             else if (result == PhysicsResult.TopPlayerScores)

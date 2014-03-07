@@ -89,6 +89,7 @@ namespace AirHockey
 
 
             renderer = new Renderer();
+            renderer.MediaPath = mediaPath;
             renderer.Viewport(Width, Height);
             renderer.OrthoCentered(viewWidth, viewHeight);
 
@@ -100,6 +101,7 @@ namespace AirHockey
             physics = new Physics();
 
             soundEngine = new ISoundEngine();
+            soundEngine.IsMultiThreaded = true;
 
             networking = new Networking(paddles);
             //networking.InitializeReceiver();

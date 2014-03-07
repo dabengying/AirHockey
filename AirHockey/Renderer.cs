@@ -87,6 +87,8 @@ namespace GameLib
         }
         */
 
+        public String MediaPath;
+
         public int CreateTextureFromFile(String filename)
         {
             int texture = 0;
@@ -94,7 +96,7 @@ namespace GameLib
             if (!loadedTextures.TryGetValue(filename, out texture))
             {
 
-                Bitmap bitmap = new Bitmap(filename);
+                Bitmap bitmap = new Bitmap(MediaPath + filename);
 
                 GL.GenTextures(1, out texture);
                 GL.BindTexture(TextureTarget.Texture2D, texture);

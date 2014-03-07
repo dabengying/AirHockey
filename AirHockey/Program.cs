@@ -102,12 +102,12 @@ namespace AirHockey
 
             soundEngine = new ISoundEngine();
 
-            networking = new Networking(paddles);
+           // networking = new Networking(paddles);
             //networking.InitializeReceiver();
             //networking.InitializeSender();
-            networking.StartBroadcast();
+            //networking.StartBroadcast();
 
-            networking.UpdateReceiver = ReceiveUpdate;
+            //networking.UpdateReceiver = ReceiveUpdate;
             
         }
 
@@ -295,13 +295,26 @@ namespace AirHockey
 
             paddles[0].velocity = (ClientToView(MouseX, MouseY) - paddles[0].position) / deltaTime;
 
-            player = physics.Update(puck, paddles, deltaTime);
+            PhysicsResult result = physics.Update(puck, paddles, deltaTime);
 
             puck.velocity *= Constants.puckDrag;
 
-            networking.SendUpdate(0, paddles[0]);
-            
+            //networking.SendUpdate(0, paddles[0]);
 
+            if (result == PhysicsResult.PuckPaddleCollision)
+            {
+                System.Console.WriteLine("hit paddle");
+                soundEngine.Play2D(mediaPath + "puckHitPaddle.wav");
+            }
+            if (result == PhysicsResult.PuckTableCollision)
+            {
+                System.Console.WriteLine("hit table");
+                soundEngine.Play2D(mediaPath + "puckHitWall.wav");
+            }
+            if (result == PhysicsResult.BottomPlayerScores)
+                player = 0;
+            else if (result == PhysicsResult.TopPlayerScores)
+                player = 1;
 
             if (player != -1)
             {

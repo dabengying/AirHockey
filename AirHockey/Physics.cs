@@ -9,7 +9,6 @@ namespace AirHockey
     {
         PuckPaddleCollision,
         PuckTableCollision,
-        PuckTableAndPaddleCollision,
         NoCollision,
         BottomPlayerScores,
         TopPlayerScores
@@ -84,12 +83,14 @@ namespace AirHockey
             public Vector2 normal;
             public float restitution;
             public Vector2 relativeVelocity;
+            public PhysicsResult collisionType;
         }
 
         bool FindFirstContact(Paddle[] paddles, Puck puck, float deltaTime, out Contact contact, out int paddle)
         {
             contact = new Contact();
             contact.time = float.PositiveInfinity;
+            contact.collisionType = PhysicsResult.NoCollision;
 
             float contactTime;
             Vector2 normal;
@@ -101,6 +102,7 @@ namespace AirHockey
                 contact.time = contactTime;
                 contact.restitution = Constants.paddleRestitution;
                 contact.relativeVelocity = puck.velocity - paddles[0].velocity;
+                contact.collisionType = PhysicsResult.PuckPaddleCollision;
                 paddle = 0;
             }
             if (SweepCircles(puck.position, Constants.puckRadius, puck.velocity, paddles[1].position, Constants.paddleRadius, paddles[1].velocity, deltaTime, out contactTime, out normal))
@@ -111,6 +113,7 @@ namespace AirHockey
                     contact.time = contactTime;
                     contact.restitution = Constants.paddleRestitution;
                     contact.relativeVelocity = puck.velocity - paddles[1].velocity;
+                    contact.collisionType = PhysicsResult.PuckPaddleCollision;
                     paddle = 1;
                 }
             }
@@ -123,6 +126,7 @@ namespace AirHockey
                     contact.time = contactTime;
                     contact.restitution = Constants.tableRestitution;
                     contact.relativeVelocity = puck.velocity;
+                    contact.collisionType = PhysicsResult.PuckTableCollision;
                 }
             }
 
@@ -134,6 +138,7 @@ namespace AirHockey
                     contact.time = contactTime;
                     contact.restitution = Constants.tableRestitution;
                     contact.relativeVelocity = puck.velocity;
+                    contact.collisionType = PhysicsResult.PuckTableCollision;
                 }
             }
 
@@ -152,6 +157,7 @@ namespace AirHockey
                         contact.time = contactTime;
                         contact.restitution = Constants.tableRestitution;
                         contact.relativeVelocity = puck.velocity;
+                        contact.collisionType = PhysicsResult.PuckTableCollision;
                     }
                 }
             }
@@ -169,6 +175,7 @@ namespace AirHockey
                         contact.time = contactTime;
                         contact.restitution = Constants.tableRestitution;
                         contact.relativeVelocity = puck.velocity;
+                        contact.collisionType = PhysicsResult.PuckTableCollision;
                     }
                 }
             }
@@ -230,8 +237,10 @@ namespace AirHockey
             }
         }
 
-        public int Update(Puck puck, Paddle[] paddles, float deltaTime)
+        public PhysicsResult Update(Puck puck, Paddle[] paddles, float deltaTime)
         {
+            PhysicsResult result = PhysicsResult.NoCollision;
+
             ClampPaddlePosition(paddles, 0);
             ClampPaddlePosition(paddles, 1);
 
@@ -248,6 +257,8 @@ namespace AirHockey
             while(FindFirstContact(paddles, puck, deltaTime, out contact, out paddle) && numIterations < 10)
             {
                 // since the paddle is treated as almost infinite mass, the impules equations just becomes the reflection equation with some restitution.
+
+                result = contact.collisionType;
 
                 deltaTime -= contact.time;
                 puck.position += puck.velocity * (contact.time * epsilon);
@@ -278,14 +289,14 @@ namespace AirHockey
 
             int p = PositionCorrection(puck, paddles);
             if (p == 0)
-                return 0;
+                return PhysicsResult.BottomPlayerScores;
             if (p == 1)
-                return 1;
+                return PhysicsResult.TopPlayerScores;
             
             paddles[0].position += paddles[0].velocity * deltaTime;
             paddles[1].position += paddles[1].velocity * deltaTime;
 
-            return -1;
+            return result;
         }
 
 

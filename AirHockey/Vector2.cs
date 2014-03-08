@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Runtime.InteropServices;
 
-namespace GameLib{
+namespace AirHockey{
 	/// <summary>
 	/// Represents 2-Dimentional vector of single-precision floating point numbers.
 	/// </summary>

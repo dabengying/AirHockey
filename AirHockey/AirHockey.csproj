@@ -55,6 +55,7 @@
     <Compile Include="MathFunctions.cs" />
     <Compile Include="Networking.cs" />
     <Compile Include="Physics.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgramBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

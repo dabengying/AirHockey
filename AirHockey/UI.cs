@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using GameLib;
+using AirHockey;
 using OpenTK.Input;
 
 namespace AirHockey

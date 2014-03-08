@@ -1,6 +1,6 @@
 ﻿
 
-﻿using GameLib;
+﻿using AirHockey;
 using System;
 using System.IO;
 using System.Net;
@@ -10,24 +10,21 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 
+
+//NONE OF THIS WORKS YET...
+
 namespace AirHockey
 {
     class Networking
     {
         Paddle[] paddles;
 
-        public delegate void ReceiveUpdate(int player, Vector2 position, Vector2 velocity);
 
-        public ReceiveUpdate UpdateReceiver;
 
         const int port = 54545;
 
         const string broadcastAddress = "255.255.255.255";
 
-        UdpClient receivingClient;
-
-        UdpClient sendingClient;
-        Thread receivingThread;
 
         public Networking(Paddle[] p)
         {
@@ -38,10 +35,7 @@ namespace AirHockey
         public void InitializeSender()
         {
 
-            sendingClient = new UdpClient();
-            sendingClient.ExclusiveAddressUse = false;
-            sendingClient.Connect(broadcastAddress, port);
-            sendingClient.EnableBroadcast = true;
+
 
         }
 
@@ -83,7 +77,11 @@ namespace AirHockey
         }
 
         bool opponentFound;
+        IPAddress opponentIPAddressFromBroadcast;
+        IPAddress opponentIPAddressFromAckListener;
+
         IPAddress opponentIPAddress;
+
         IPAddress localIPAddress;
 
         public void StartBroadcast()
@@ -95,17 +93,37 @@ namespace AirHockey
 
             Thread listenThread = new Thread(GameSearchListen);
             listenThread.Start();
+
+            Thread ackListenThread = new Thread(GameSearchAckListen);
+            ackListenThread.Start();
         }
 
+        bool searchBroadcastReceived;
+        bool ackAckReceived;
 
-        void GameSearchSend()
+        //LOOP SEND BROADCAST
+        //RECEIVE BROADCAST, LOOP SEND-BROADCAST RECEIVED
+        //RECEIVE BROADCAST-RECEIVED LOOP SEND BROADCAST-RECEIVED-ACK 
+        //RECEIVE BROADCAST-RECEIVED-ACK, START GAME
+
+        // how to find an opponent:
+        // when a network game is started, continuously broadcast a search message at a regular interval.
+        // at the same time listen for the opponents search broadcast
+        // also listen for the opponents ACK 
+        // when a search broadcast is recived, send an ACK back to the opponent. 
+        // then the opponent sends back an ACK-ACK
+        // when an ACK-ACK is received then the search broadcast can be stopped and the game can be started.
+        void GameSearchSend() 
         {
             UdpClient client = new UdpClient();
             client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.EnableBroadcast = true;
             client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
 
-            IPEndPoint remoteEp = new IPEndPoint(IPAddress.Broadcast, 1500);
-            while (!opponentFound)
+            IPAddress broadcastAddress = IPAddress.Parse("192.168.1.255");
+
+            IPEndPoint remoteEp = new IPEndPoint(broadcastAddress, 1500);
+            while (!searchBroadcastReceived)
             {
                 byte[] bytes = Encoding.ASCII.GetBytes("AirHockey-Search " + localIPAddress.ToString());
 
@@ -117,17 +135,42 @@ namespace AirHockey
             client.Close();
         }
 
+        const int ackPort = 2000;
+
+        private void GameSearchAckListen()
+        {
+            TcpListener listener = new TcpListener(IPAddress.Any, ackPort);
+            listener.Start();
+            Socket socket = listener.AcceptSocket();
+
+            byte[] bytes = new byte[100];
+            int k = socket.Receive(bytes);
+
+            String ackString = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            if(ackString == "AirHockey-ACK")
+            {
+
+            }
+
+            socket.Close();
+            listener.Stop();
+
+        }
+    
+        
+
         private void GameSearchListen()
         {
-            UdpClient gameSearchUdpClient = new UdpClient();
-            gameSearchUdpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            gameSearchUdpClient.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
+            UdpClient client = new UdpClient();
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.EnableBroadcast = true;
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
 
             IPEndPoint remoteEp = new IPEndPoint(IPAddress.Any, 15000);
 
-            while (!opponentFound)
+            while (!searchBroadcastReceived)
             {
-                byte[] bytes = gameSearchUdpClient.Receive(ref remoteEp);
+                byte[] bytes = client.Receive(ref remoteEp);
                 string message = Encoding.ASCII.GetString(bytes);
 
                 String[] splitMessage = message.Split(' ');
@@ -142,7 +185,62 @@ namespace AirHockey
                         if (!ipAddress.Equals(localIPAddress))
                         {
                             opponentIPAddress = ipAddress;
-                            System.Console.Write(opponentIPAddress.ToString());
+                            searchBroadcastReceived = true;
+                        }
+                    }
+                }
+
+                if(splitMessage[0] == "AirHockey-ACK")
+                {
+
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            // send ACK
+
+            while(!ackAckReceived)
+            {
+                byte[] sendBytes = Encoding.ASCII.GetBytes("AirHockey-ACK " + localIPAddress.ToString());
+
+                IPEndPoint opponentEP = new IPEndPoint(opponentIPAddress, 1500);
+                client.Send(sendBytes, sendBytes.Length, opponentEP);
+            }
+
+            //listen for the ACK-ACK
+
+            Thread ackAckListenerThread = new Thread(AckAckListener);
+            ackAckListenerThread.Start();
+        }
+
+        void AckAckListener()
+        {
+            UdpClient client = new UdpClient();
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.EnableBroadcast = true;
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
+
+            IPEndPoint remoteEp = new IPEndPoint(IPAddress.Any, 15000);
+
+            while (!ackAckReceived)
+            {
+                byte[] bytes = client.Receive(ref remoteEp);
+                string message = Encoding.ASCII.GetString(bytes);
+
+                String[] splitMessage = message.Split(' ');
+
+                if (splitMessage[0] == "AirHockey-ACK-ACK")
+                {
+                    IPAddress ipAddress;
+
+
+                    if (IPAddress.TryParse(splitMessage[1], out ipAddress))
+                    {
+
+                        if(ipAddress.Equals(opponentIPAddress))
+                        {
+                            //START THE GAME!
                         }
                     }
                 }
@@ -151,62 +249,7 @@ namespace AirHockey
             }
         }
 
-        public void InitializeReceiver()
-        {
 
-            receivingClient = new UdpClient();
-            receivingClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            receivingClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
-           
-            ThreadStart start = new ThreadStart(Receiver);
-
-            receivingThread = new Thread(start);
-
-            receivingThread.IsBackground = true;
-
-            receivingThread.Start();
-
-        }
-
-        public void SendUpdate(int player, Paddle paddle)
-        {
-            //        string toSend = userName + ":\n" + tbSend.Text;
-            var data = Encoding.ASCII.GetBytes(player.ToString() + ' ' + paddle.position.X.ToString() + ' ' + paddle.position.Y + ' ' + 
-                paddle.velocity.X.ToString() + ' ' + paddle.velocity.Y.ToString()); 
-
-
-            //sendingClient.Send(data, data.Length);
-
-        }
-
-        public void Receiver()
-        {
-
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, port);
-
-
-            while (true)
-            {
-
-                byte[] data = receivingClient.Receive(ref endPoint);
-
-                string message = Encoding.ASCII.GetString(data);
-
-                String[] splits = message.Split(' ');
-
-                Vector2 position = new Vector2();
-                Vector2 velocity = new Vector2();
-
-                int player = int.Parse(splits[0]);
-                position.X = float.Parse(splits[1]);
-                position.Y = float.Parse(splits[2]);
-                velocity.X = float.Parse(splits[3]);
-                velocity.Y = float.Parse(splits[4]);
-
-                UpdateReceiver(player, position, velocity);
-            }
-
-        }
 
 
     }

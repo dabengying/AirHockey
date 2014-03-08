@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Runtime.InteropServices;
 
-namespace GameLib{
+namespace AirHockey{
 
 	/// <summary>
 	/// Represents an RGBA color.

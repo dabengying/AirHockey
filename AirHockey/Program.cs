@@ -1,5 +1,5 @@
 ﻿using System;
-using GameLib;
+using AirHockey;
 using System.Collections;
 
 using System.Drawing;
@@ -42,7 +42,7 @@ namespace AirHockey
    
     public class AppWindow : Program 
     {
-        //units are feet, seconds
+
 
         float viewWidth;
         float viewHeight;
@@ -60,7 +60,6 @@ namespace AirHockey
         Networking networking;
 
         Physics physics;
-        AI ai;
 
         ISoundEngine soundEngine;
 
@@ -71,6 +70,10 @@ namespace AirHockey
         GameState gameState;
 
         int tableTexture;
+
+        LocalPlayer localPlayer;
+        AIPlayer ai;
+
 
         public AppWindow()
             : base(640/2, 1136/2)
@@ -96,7 +99,7 @@ namespace AirHockey
             startMenu = new StartMenu(renderer, this);
             gameOverMenu = new GameOverMenu(renderer, this);
 
-            ai = new AI();
+            ai = new AIPlayer();
 
             physics = new Physics();
 
@@ -105,9 +108,11 @@ namespace AirHockey
             networking = new Networking(paddles);
             //networking.InitializeReceiver();
             //networking.InitializeSender();
-            //networking.StartBroadcast();
+            networking.StartBroadcast();
 
             //networking.UpdateReceiver = ReceiveUpdate;
+
+            localPlayer = new LocalPlayer(() => MouseX, () => MouseY, ClientToView);
             
         }
 
@@ -222,9 +227,6 @@ namespace AirHockey
             SwapBuffers();
         }
 
-
-
-
         public Vector2 ClientToView(int x, int y)
         {
             return new Vector2(viewWidth * (float)x / (float)Width - viewWidth * 0.5f, (float)viewHeight * (Height - y) / (float)Height - viewHeight * 0.5f);
@@ -281,25 +283,19 @@ namespace AirHockey
 
         }
 
-        void ReceiveUpdate(int player, Vector2 position, Vector2 velocity)
-        {
-            paddles[player].position = position;
-            paddles[player].velocity = velocity;
-        }
-
         void PlayGame(float deltaTime)
         {
+
+
             int player = -1;
 
-            ai.Update(deltaTime, puck, paddles[1]);
-
-            paddles[0].velocity = (ClientToView(MouseX, MouseY) - paddles[0].position) / deltaTime;
+            ai.Update(paddles[1], paddles[0], puck, deltaTime);
+            localPlayer.Update(paddles[0], paddles[1], puck, deltaTime);
 
             PhysicsResult result = physics.Update(puck, paddles, deltaTime);
 
-            puck.velocity *= Constants.puckDrag;
+            puck.velocity *= Constants.puckDrag; // just use first order taylor approximation.
 
-            //networking.SendUpdate(0, paddles[0]);
 
             if (result == PhysicsResult.PuckPaddleCollision)
             {

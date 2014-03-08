@@ -11,7 +11,7 @@ using System.Drawing.Imaging;
 
 using System;
 
-namespace GameLib
+namespace AirHockey
 {
     public class Renderer
     {

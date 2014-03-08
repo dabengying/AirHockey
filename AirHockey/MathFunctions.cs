@@ -1,6 +1,6 @@
 using System;
 
-namespace GameLib{
+namespace AirHockey{
 	/// <summary>
 	/// Provides standard mathematical functions for the library types.
 	/// </summary>

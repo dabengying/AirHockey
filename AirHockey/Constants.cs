@@ -8,6 +8,8 @@ namespace AirHockey
 {
     class Constants
     {
+        //units are based on feet...
+
         public const float tableWidth = 4.0f; // official 8'x4'
         public const float tableHeight = 8.0f;
         public const float tableRestitution = 0.9f;
@@ -17,7 +19,7 @@ namespace AirHockey
 
         public const float paddleRestitution = 0.9f;
         public const float maxPuckSpeed = 16.0f;
-        public const float puckDrag = 0.98f;
+        public const float puckDrag = 0.98f; 
 
         public const float centerLineOverlap = 0.8f; // as a fraction of the paddle radius, technically 1 for official
 

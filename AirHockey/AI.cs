@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GameLib;
+using AirHockey;
 
 namespace AirHockey
 {
-    class AI
+    class AIPlayer : Player 
     {
         enum AIState
         {
@@ -16,13 +16,13 @@ namespace AirHockey
             Defense
         }
 
-        public AI()
+        public AIPlayer()
         {
             speed = 8.0f;
             state = AIState.Defense;
         }
 
-        public void Update(float deltaTime, Puck puck, Paddle paddle)
+        public override void Update(Paddle playerPaddle, Paddle opponentPaddle, Puck puck, float deltaTime)
         {
             thinkTimer += deltaTime;
             if (thinkTimer > 0.4)
@@ -51,16 +51,16 @@ namespace AirHockey
                 target = puck.position + new Vector2(0, Constants.puckRadius * 0.6f); // try to hit near the top but a little inside
             }
 
-            trajectory = target - paddle.position;
+            trajectory = target - playerPaddle.position;
             trajectory.Normalize();
 
-            paddle.velocity = trajectory * speed;
+            playerPaddle.velocity = trajectory * speed;
 
 
             // don't overshoot target
-            if (speed * deltaTime > (target - paddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius && state == AIState.Defense)
+            if (speed * deltaTime > (target - playerPaddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius && state == AIState.Defense)
             { //TODO: this is wrong, the impulse should not be small when we are really close...
-                paddle.velocity = trajectory * ((target - paddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius) / deltaTime;
+                playerPaddle.velocity = trajectory * ((target - playerPaddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius) / deltaTime;
             }
         }
 

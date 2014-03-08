@@ -101,7 +101,6 @@ namespace AirHockey
             physics = new Physics();
 
             soundEngine = new ISoundEngine();
-            soundEngine.IsMultiThreaded = true;
 
             networking = new Networking(paddles);
             //networking.InitializeReceiver();

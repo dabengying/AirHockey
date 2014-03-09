@@ -17,28 +17,6 @@ namespace AirHockey
 {
     class Networking
     {
-        Paddle[] paddles;
-
-
-
-        const int port = 54545;
-
-        const string broadcastAddress = "255.255.255.255";
-
-
-        public Networking(Paddle[] p)
-        {
-            paddles = p;
-        }
-
-
-        public void InitializeSender()
-        {
-
-
-
-        }
-
         public IPAddress GetLocalIPAddress()
         {
             // Disregard virtual addresses.
@@ -77,53 +55,37 @@ namespace AirHockey
         }
 
         bool opponentFound;
-        IPAddress opponentIPAddressFromBroadcast;
-        IPAddress opponentIPAddressFromAckListener;
-
         IPAddress opponentIPAddress;
+        const int broadcastPort = 1500;
+        const int tcpPort = 2000;
 
         IPAddress localIPAddress;
 
-        public void StartBroadcast()
+        public void StartGameSearch()
         {
             localIPAddress = GetLocalIPAddress();
 
-            Thread sendThread = new Thread(GameSearchSend);
+            Thread sendThread = new Thread(GameSearchBroadcast);
             sendThread.Start();
 
-            Thread listenThread = new Thread(GameSearchListen);
+            Thread listenThread = new Thread(GameSearchBroadcastListen);
             listenThread.Start();
 
             Thread ackListenThread = new Thread(GameSearchAckListen);
             ackListenThread.Start();
         }
 
-        bool searchBroadcastReceived;
-        bool ackAckReceived;
-
-        //LOOP SEND BROADCAST
-        //RECEIVE BROADCAST, LOOP SEND-BROADCAST RECEIVED
-        //RECEIVE BROADCAST-RECEIVED LOOP SEND BROADCAST-RECEIVED-ACK 
-        //RECEIVE BROADCAST-RECEIVED-ACK, START GAME
-
-        // how to find an opponent:
-        // when a network game is started, continuously broadcast a search message at a regular interval.
-        // at the same time listen for the opponents search broadcast
-        // also listen for the opponents ACK 
-        // when a search broadcast is recived, send an ACK back to the opponent. 
-        // then the opponent sends back an ACK-ACK
-        // when an ACK-ACK is received then the search broadcast can be stopped and the game can be started.
-        void GameSearchSend() 
+        void GameSearchBroadcast() 
         {
             UdpClient client = new UdpClient();
             client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             client.EnableBroadcast = true;
-            client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, broadcastPort));
 
             IPAddress broadcastAddress = IPAddress.Parse("192.168.1.255");
 
-            IPEndPoint remoteEp = new IPEndPoint(broadcastAddress, 1500);
-            while (!searchBroadcastReceived)
+            IPEndPoint remoteEp = new IPEndPoint(broadcastAddress, broadcastPort);
+            while (!opponentFound)
             {
                 byte[] bytes = Encoding.ASCII.GetBytes("AirHockey-Search " + localIPAddress.ToString());
 
@@ -135,40 +97,16 @@ namespace AirHockey
             client.Close();
         }
 
-        const int ackPort = 2000;
-
-        private void GameSearchAckListen()
-        {
-            TcpListener listener = new TcpListener(IPAddress.Any, ackPort);
-            listener.Start();
-            Socket socket = listener.AcceptSocket();
-
-            byte[] bytes = new byte[100];
-            int k = socket.Receive(bytes);
-
-            String ackString = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-            if(ackString == "AirHockey-ACK")
-            {
-
-            }
-
-            socket.Close();
-            listener.Stop();
-
-        }
-    
-        
-
-        private void GameSearchListen()
+        private void GameSearchBroadcastListen()
         {
             UdpClient client = new UdpClient();
             client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             client.EnableBroadcast = true;
-            client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
+            client.Client.Bind(new IPEndPoint(IPAddress.Any, broadcastPort));
 
-            IPEndPoint remoteEp = new IPEndPoint(IPAddress.Any, 15000);
+            IPEndPoint remoteEp = new IPEndPoint(IPAddress.Any, broadcastPort);
 
-            while (!searchBroadcastReceived)
+            while (!opponentFound) // figure out how to not broadcast to myself...
             {
                 byte[] bytes = client.Receive(ref remoteEp);
                 string message = Encoding.ASCII.GetString(bytes);
@@ -185,73 +123,68 @@ namespace AirHockey
                         if (!ipAddress.Equals(localIPAddress))
                         {
                             opponentIPAddress = ipAddress;
-                            searchBroadcastReceived = true;
+                            opponentFound = true;
                         }
                     }
                 }
 
-                if(splitMessage[0] == "AirHockey-ACK")
-                {
-
-                }
-
-                Thread.Sleep(1000);
             }
 
-            // send ACK
+            client.Close();
 
-            while(!ackAckReceived)
-            {
-                byte[] sendBytes = Encoding.ASCII.GetBytes("AirHockey-ACK " + localIPAddress.ToString());
+            
+            TcpClient tcpClient = new TcpClient(new IPEndPoint(IPAddress.Any, tcpPort));
+            
+            String ackMessage = "AirHockey-ACK " + localIPAddress;
 
-                IPEndPoint opponentEP = new IPEndPoint(opponentIPAddress, 1500);
-                client.Send(sendBytes, sendBytes.Length, opponentEP);
-            }
+            Byte[] data = System.Text.Encoding.ASCII.GetBytes(ackMessage);
 
-            //listen for the ACK-ACK
+            NetworkStream stream = tcpClient.GetStream();
 
-            Thread ackAckListenerThread = new Thread(AckAckListener);
-            ackAckListenerThread.Start();
+            stream.Write(data, 0, data.Length);
+
+            //START GAME
         }
 
-        void AckAckListener()
+        private void GameSearchAckListen()
         {
-            UdpClient client = new UdpClient();
-            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            client.EnableBroadcast = true;
-            client.Client.Bind(new IPEndPoint(IPAddress.Any, 1500));
+            TcpListener tcpListener = new TcpListener(IPAddress.Any, tcpPort);
 
-            IPEndPoint remoteEp = new IPEndPoint(IPAddress.Any, 15000);
+            tcpListener.Start();
 
-            while (!ackAckReceived)
+            // Buffer for reading data
+            Byte[] bytes = new Byte[256];
+            String message = null;
+
+            TcpClient client = tcpListener.AcceptTcpClient();
+            
+       
+            NetworkStream stream = client.GetStream();
+            stream.Read(bytes, 0, bytes.Length);
+
+            message = System.Text.Encoding.ASCII.GetString(bytes);
+
+            String[] splitMessage = message.Split(' ');
+
+            if (splitMessage[0] == "AirHockey-Search")
             {
-                byte[] bytes = client.Receive(ref remoteEp);
-                string message = Encoding.ASCII.GetString(bytes);
+                IPAddress ipAddress;
 
-                String[] splitMessage = message.Split(' ');
 
-                if (splitMessage[0] == "AirHockey-ACK-ACK")
+                if (IPAddress.TryParse(splitMessage[1], out ipAddress))
                 {
-                    IPAddress ipAddress;
-
-
-                    if (IPAddress.TryParse(splitMessage[1], out ipAddress))
+                    if (!ipAddress.Equals(localIPAddress))
                     {
-
-                        if(ipAddress.Equals(opponentIPAddress))
-                        {
-                            //START THE GAME!
-                        }
+                        opponentIPAddress = ipAddress;
+                        opponentFound = true;
                     }
                 }
-
-                Thread.Sleep(1000);
             }
+
+            client.Close();
+
+            //START GAME
         }
-
-
-
-
     }
 }
 

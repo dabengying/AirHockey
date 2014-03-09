@@ -105,10 +105,10 @@ namespace AirHockey
 
             soundEngine = new ISoundEngine();
 
-            networking = new Networking(paddles);
+            networking = new Networking();
             //networking.InitializeReceiver();
             //networking.InitializeSender();
-            networking.StartBroadcast();
+            networking.StartGameSearch();
 
             //networking.UpdateReceiver = ReceiveUpdate;
 

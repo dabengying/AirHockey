@@ -144,6 +144,7 @@ namespace AirHockey
             stream.Write(data, 0, data.Length);
 
             //START GAME
+            System.Console.WriteLine("Start game, opponentIPAddress = {0}", opponentIPAddress);
         }
 
         private void GameSearchAckListen()
@@ -183,6 +184,7 @@ namespace AirHockey
 
             client.Close();
 
+            System.Console.WriteLine("Start game, opponentIPAddress = {0}", opponentIPAddress);
             //START GAME
         }
     }

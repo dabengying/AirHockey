@@ -68,6 +68,8 @@ namespace AirHockey
 
         public override void Update(Paddle playerPaddle, Paddle opponentPadde, Puck puck, float deltaTime)
         {
+            playerPaddle.velocity = (clientToView(mouseX(), mouseY()) - playerPaddle.position) / deltaTime;
+
             //        string toSend = userName + ":\n" + tbSend.Text;
             var data = Encoding.ASCII.GetBytes(playerPaddle.position.X.ToString() + ' ' + playerPaddle.position.Y + ' ' +
                 playerPaddle.velocity.X.ToString() + ' ' + playerPaddle.velocity.Y.ToString());
@@ -85,7 +87,7 @@ namespace AirHockey
 
         int port;
 
-        LANGameOpponentPlayer()
+        public LANGameOpponentPlayer()
         {
             port = 54543; //TODO: Move to constants or networkign or something...
 

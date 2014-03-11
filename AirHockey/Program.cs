@@ -8,6 +8,7 @@ using OpenTK.Graphics.OpenGL;
 using IrrKlang;
 using System.Collections.Generic;
 using OpenTK.Input;
+using System.Net;
 
 
 namespace AirHockey
@@ -71,8 +72,8 @@ namespace AirHockey
 
         int tableTexture;
 
-        LocalPlayer localPlayer;
-        AIPlayer ai;
+        LANGameLocalPlayer localPlayer;
+        LANGameOpponentPlayer opponentPlayer;
 
 
         public AppWindow()
@@ -99,7 +100,7 @@ namespace AirHockey
             startMenu = new StartMenu(renderer, this);
             gameOverMenu = new GameOverMenu(renderer, this);
 
-            ai = new AIPlayer();
+            opponentPlayer = new LANGameOpponentPlayer();
 
             physics = new Physics();
 
@@ -108,11 +109,11 @@ namespace AirHockey
             networking = new Networking();
             //networking.InitializeReceiver();
             //networking.InitializeSender();
-            networking.StartGameSearch();
+          //  networking.StartGameSearch();
 
             //networking.UpdateReceiver = ReceiveUpdate;
 
-            localPlayer = new LocalPlayer(() => MouseX, () => MouseY, ClientToView);
+            localPlayer = new LANGameLocalPlayer(() => MouseX, () => MouseY, ClientToView, IPAddress.Parse("192.168.1.113"));
             
         }
 
@@ -289,8 +290,8 @@ namespace AirHockey
 
             int player = -1;
 
-            ai.Update(paddles[1], paddles[0], puck, deltaTime);
-            localPlayer.Update(paddles[0], paddles[1], puck, deltaTime);
+            opponentPlayer.Update(paddles[0], paddles[1], puck, deltaTime);
+            localPlayer.Update(paddles[1], paddles[0], puck, deltaTime);
 
             PhysicsResult result = physics.Update(puck, paddles, deltaTime);
 

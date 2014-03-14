@@ -55,14 +55,14 @@ namespace AirHockey
 
         public LANGameLocalPlayer(MouseX mX, MouseY mY, ClientToView ctv, IPAddress opponentIPAddress)
         {
-            port = 54543; // TODO: move this somewhere better since it's used in a few spots...
+            port = 5555; // TODO: move this somewhere better since it's used in a few spots...
 
             mouseX = mX;
             mouseY = mY;
             clientToView = ctv;
         
             client = new UdpClient();
-            client.ExclusiveAddressUse = false;
+           // client.ExclusiveAddressUse = false;
             client.Connect(opponentIPAddress, port);
         }
 
@@ -89,10 +89,10 @@ namespace AirHockey
 
         public LANGameOpponentPlayer()
         {
-            port = 54543; //TODO: Move to constants or networkign or something...
+            port = 5555; //TODO: Move to constants or networkign or something...
 
             receivingClient = new UdpClient();
-            receivingClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+          //  receivingClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             receivingClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
 
 

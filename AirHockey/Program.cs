@@ -48,7 +48,7 @@ namespace AirHockey
         float viewWidth;
         float viewHeight;
 
-        const String mediaPath = "..\\..\\media\\";
+        const String mediaPath = "../../media/";
 
         Animation readyGoAnimation;
         Animation newGameAnimation;
@@ -113,7 +113,7 @@ namespace AirHockey
 
             //networking.UpdateReceiver = ReceiveUpdate;
 
-            localPlayer = new LANGameLocalPlayer(() => MouseX, () => MouseY, ClientToView, IPAddress.Parse("192.168.1.113"));
+            localPlayer = new LANGameLocalPlayer(() => MouseX, () => MouseY, ClientToView, IPAddress.Parse("192.168.1.108"));
             
         }
 
@@ -140,7 +140,7 @@ namespace AirHockey
 
         protected override void OnLoad(EventArgs e)
         {
-            tableTexture = renderer.CreateTextureFromFile("Table.png");
+            tableTexture = renderer.CreateTextureFromFile("table.png");
 
             OpenTK.Box2 box = new OpenTK.Box2(new OpenTK.Vector2(-Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f), new OpenTK.Vector2(Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f));
             readyGoAnimation = new Animation();
@@ -290,8 +290,8 @@ namespace AirHockey
 
             int player = -1;
 
-            opponentPlayer.Update(paddles[0], paddles[1], puck, deltaTime);
-            localPlayer.Update(paddles[1], paddles[0], puck, deltaTime);
+            opponentPlayer.Update(paddles[1], paddles[0], puck, deltaTime);
+            localPlayer.Update(paddles[0], paddles[1], puck, deltaTime);
 
             PhysicsResult result = physics.Update(puck, paddles, deltaTime);
 

@@ -62,7 +62,11 @@ namespace AirHockey
             clientToView = ctv;
         
             client = new UdpClient();
+<<<<<<< HEAD
            // client.ExclusiveAddressUse = false;
+=======
+            //client.ExclusiveAddressUse = false;
+>>>>>>> 4f7c0d20cc13b4ef5add5ade2433dd2885df4e53
             client.Connect(opponentIPAddress, port);
         }
 
@@ -92,7 +96,11 @@ namespace AirHockey
             port = 5555; //TODO: Move to constants or networkign or something...
 
             receivingClient = new UdpClient();
+<<<<<<< HEAD
           //  receivingClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+=======
+         //   receivingClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+>>>>>>> 4f7c0d20cc13b4ef5add5ade2433dd2885df4e53
             receivingClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
 
 

@@ -1,11 +1,6 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Collections;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Runtime.InteropServices;
 
 namespace AirHockey{
@@ -16,26 +11,13 @@ namespace AirHockey{
 	[Serializable]
 	[StructLayout(LayoutKind.Sequential)]
 	[TypeConverter(typeof(ExpandableObjectConverter))]
-	public class Color4 : ISerializable, ICloneable
+	public struct Color4 : ISerializable, ICloneable
 	{
 		#region Private Fields
 		private float _red,_green,_blue,_alpha;
 		#endregion
 
 		#region Constructores
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Color4"/> class.
-		/// </summary>
-		/// <remarks>
-		/// Default values are 1.0f for Alpha and 0.0f for the color channels.
-		/// </remarks>
-		public Color4()
-		{
-			_red	= 0.0f;
-			_green	= 0.0f;
-			_blue	= 0.0f;
-			_alpha	= 1.0f;
-		}
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Color4"/> class.
 		/// </summary>
@@ -75,30 +57,7 @@ namespace AirHockey{
 			_blue	= color.B;
 			_alpha	= color.A;
 		}
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Color4"/> class from a blend of two colors.
-		/// </summary>
-		/// <param name="source">The blend source color.</param>
-		/// <param name="dest">The blend destination color.</param>
-		/// <param name="opacity">The opacity value.</param>
-		public Color4(Color4 source, Color4 dest, float opacity)
-		{
-			_red	= MathFunctions.LinearInterpolation(source.R, dest.R, opacity);
-			_green	= MathFunctions.LinearInterpolation(source.G, dest.G, opacity);
-			_blue	= MathFunctions.LinearInterpolation(source.B, dest.B, opacity);
-		}
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Color4"/> class with serialized data.
-		/// </summary>
-		/// <param name="info">The object that holds the serialized object data.</param>
-		/// <param name="context">The contextual information about the source or destination.</param>
-		protected Color4(SerializationInfo info, StreamingContext context)
-		{
-			_red	= info.GetSingle("Red");
-			_green	= info.GetSingle("Green");
-			_blue	= info.GetSingle("Blue");
-			_alpha	= info.GetSingle("Alpha");
-		}
+
 		#endregion
 
 		#region Public Properties
@@ -260,29 +219,7 @@ namespace AirHockey{
          */
 		#endregion
 
-		#region Overrides
-		/// <summary>
-		/// Returns the hashcode for this instance.
-		/// </summary>
-		/// <returns>A 32-bit signed integer hash code.</returns>
-		public override int GetHashCode()
-		{
-			return _red.GetHashCode() ^ _green.GetHashCode() ^ _blue.GetHashCode() ^ _alpha.GetHashCode();
-		}
-		/// <summary>
-		/// Returns a value indicating whether this instance is equal to
-		/// the specified object.
-		/// </summary>
-		/// <param name="obj">An object to compare to this instance.</param>
-		/// <returns><see langword="true"/> if <paramref name="obj"/> is a <see cref="Color4"/> and has the same values as this instance; otherwise, <see langword="false"/>.</returns>
-		public override bool Equals(object obj)
-		{
-			Color4 color = obj as Color4;
-			if (color != null)
-				return (_red == color.R) && (_green == color.G) && (_blue == color.B) && (_alpha == color.A);
-			else 
-				return false;
-		}
+
 
 		/// <summary>
 		/// Returns a string representation of this object.
@@ -292,7 +229,6 @@ namespace AirHockey{
 		{
 			return string.Format("ColorF({0}, {1}, {2}, {3})", _red, _green, _blue, _alpha);
 		}
-		#endregion
 
 		#region Comparison Operators
 		/// <summary>
@@ -303,7 +239,7 @@ namespace AirHockey{
 		/// <returns><see langword="true"/> if the two <see cref="Color4"/> instances are equal; otherwise, <see langword="false"/>.</returns>
 		public static bool operator==(Color4 u, Color4 v)
 		{
-			return Object.Equals(u,v);
+            return u.R == v.R && u.G == v.G && u.B == v.B && u.A == v.A;
 		}
 		/// <summary>
 		/// Tests whether two specified <see cref="Color4"/> instances are not equal.

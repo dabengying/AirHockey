@@ -7,7 +7,7 @@ using AirHockey;
 
 namespace AirHockey
 {
-    class AIPlayer : Player 
+    class AIPlayer  
     {
         enum AIState
         {
@@ -22,8 +22,11 @@ namespace AirHockey
             state = AIState.Defense;
         }
 
-        public override void Update(Paddle playerPaddle, Paddle opponentPaddle, Puck puck, float deltaTime)
+        public void Update(GameFrame gameFrame, float deltaTime)
         {
+            Body playerPaddle = gameFrame.Paddles[1];
+            Body opponentPaddle = gameFrame.Paddles[0];
+            Body puck = gameFrame.Puck;
             thinkTimer += deltaTime;
             if (thinkTimer > 0.4)
             {
@@ -59,7 +62,7 @@ namespace AirHockey
 
             // don't overshoot target
             if (speed * deltaTime > (target - playerPaddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius && state == AIState.Defense)
-            { //TODO: this is wrong, the impulse should not be small when we are really close...
+            { //TODO: this is wrong, the impulse should not necessarily be small when we are really close...
                 playerPaddle.velocity = trajectory * ((target - playerPaddle.position).GetLength() - Constants.puckRadius - Constants.paddleRadius) / deltaTime;
             }
         }

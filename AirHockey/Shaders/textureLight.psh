@@ -1,0 +1,36 @@
+﻿
+#version 400
+
+
+uniform vec3 lightPositions[8];
+uniform vec4 lightColors[8];
+uniform float lightKs[8];
+uniform float lightPs[8];
+uniform int numLights;
+uniform vec4 ambient;
+
+uniform sampler2D tex;
+
+
+varying vec4 ex_Color;
+varying vec4 ex_Position;
+varying vec2 ex_TexCoords;
+
+const float falloff = 2.0f;
+
+void main() {
+
+	vec3 worldFragPos = vec3(ex_Position.xy, 1);
+	vec3 L = vec3(0, 0, 0);
+
+	for (int i = 0; i < numLights; i++) {
+		float dist = length(worldFragPos.xy - lightPositions[i].xy);
+		float intensity = 1.0f / (lightKs[i] * pow(dist, lightPs[i]) + 1.0f);
+		L += lightColors[i].rgb * intensity;
+	}
+
+	L += ambient.xyz;
+
+	vec4 samp = texture2D(tex, ex_TexCoords);
+	gl_FragColor = vec4(samp.rgb * L * ex_Color.rbg, samp.a * ex_Color.a);
+}

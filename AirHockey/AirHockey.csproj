@@ -50,22 +50,51 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI.cs" />
-    <Compile Include="Color.cs" />
+    <Compile Include="Graphics\Animation.cs" />
+    <Compile Include="AnimationState.cs" />
+    <Compile Include="Core\Button.cs" />
+    <Compile Include="Core\Color.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="MathFunctions.cs" />
-    <Compile Include="Networking.cs" />
+    <Compile Include="GameFrame.cs" />
+    <Compile Include="GameOverState.cs" />
+    <Compile Include="Core\Input.cs" />
+    <Compile Include="Graphics\Camera.cs" />
+    <Compile Include="Graphics\Shadow.cs" />
+    <Compile Include="Graphics\VertexColorEffect.cs" />
+    <Compile Include="Graphics\Geometry.cs" />
+    <Compile Include="Graphics\GeometryFactory.cs" />
+    <Compile Include="Graphics\Light.cs" />
+    <Compile Include="Core\MathFunctions.cs" />
+    <Compile Include="Graphics\Effect.cs" />
+    <Compile Include="Graphics\TextureEffect.cs" />
+    <Compile Include="Graphics\TextureLightEffect.cs" />
+    <Compile Include="Graphics\VertexColorLightEffect.cs" />
     <Compile Include="Physics.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="PlayingState.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="ProgramBase.cs" />
+    <Compile Include="Core\ProgramBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Renderer.cs" />
-    <Compile Include="Rotation2.cs" />
-    <Compile Include="UI.cs" />
-    <Compile Include="Vector2.cs" />
+    <Compile Include="Graphics\Renderer.cs" />
+    <Compile Include="Core\ResourceManager.cs" />
+    <Compile Include="Core\Rotation2.cs" />
+    <Compile Include="Graphics\Scene.cs" />
+    <Compile Include="Graphics\Visual.cs" />
+    <Compile Include="StartMenuState.cs" />
+    <Compile Include="StateManager.cs" />
+    <Compile Include="Core\Vector2.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shaders\texture.psh" />
+    <Content Include="Shaders\texture.vsh" />
+    <Content Include="Shaders\textureLight.psh" />
+    <Content Include="Shaders\textureLight.vsh" />
+    <Content Include="Shaders\vertexColorLight.vsh" />
+    <Content Include="Shaders\vertexColor.psh" />
+    <Content Include="Shaders\vertexColor.vsh" />
+    <Content Include="Shaders\vertexColorLight.psh" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

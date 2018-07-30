@@ -24,5 +24,8 @@ namespace AirHockey
         public const float centerLineOverlap = 0.8f; // as a fraction of the paddle radius, technically 1 for official
 
         public const float goalWidth = tableHeight / 3.0f; // as a fraction of tableWidth
+
+        public const float viewWidth = 4f;
+        public const float viewHeight = 8f;
     }
 }

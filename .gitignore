@@ -205,3 +205,8 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 
+/.vs/AirHockey/v15/Browse.VC.opendb
+/.vs
+/.vs/AirHockey/v15/Browse.VC.db
+/.vs/AirHockey/v15/Browse.VC.opendb
+/.vs

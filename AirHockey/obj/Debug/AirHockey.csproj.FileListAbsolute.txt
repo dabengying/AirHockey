@@ -6,3 +6,11 @@ C:\Users\Public\Projects\AirHockey\AirHockey\bin\Debug\OpenTK.dll
 C:\Users\Public\Projects\AirHockey\AirHockey\obj\Debug\AirHockey.csprojResolveAssemblyReference.cache
 C:\Users\Public\Projects\AirHockey\AirHockey\obj\Debug\AirHockey.exe
 C:\Users\Public\Projects\AirHockey\AirHockey\obj\Debug\AirHockey.pdb
+C:\Users\Robert\Desktop\AirHockey\AirHockey\bin\Debug\AirHockey.exe.config
+C:\Users\Robert\Desktop\AirHockey\AirHockey\bin\Debug\AirHockey.exe
+C:\Users\Robert\Desktop\AirHockey\AirHockey\bin\Debug\AirHockey.pdb
+C:\Users\Robert\Desktop\AirHockey\AirHockey\bin\Debug\irrKlang.NET4.dll
+C:\Users\Robert\Desktop\AirHockey\AirHockey\bin\Debug\OpenTK.dll
+C:\Users\Robert\Desktop\AirHockey\AirHockey\obj\Debug\AirHockey.exe
+C:\Users\Robert\Desktop\AirHockey\AirHockey\obj\Debug\AirHockey.pdb
+C:\Users\Robert\Desktop\AirHockey\AirHockey\obj\Debug\AirHockey.csprojResolveAssemblyReference.cache

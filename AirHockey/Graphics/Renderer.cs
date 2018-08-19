@@ -20,8 +20,10 @@ namespace AirHockey.Graphics
             Camera = new Camera();
             ClearColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
             ShadowEffect = new VertexColorEffect();
+            
         }
 
+        DeferredLighting lightBuffer;
         int clientWidth;
         int clientHeight;
 
@@ -41,6 +43,7 @@ namespace AirHockey.Graphics
         {
             clientWidth = width;
             clientHeight = height;
+            lightBuffer = new DeferredLighting(width, height);
             OpenTK.Graphics.OpenGL.GL.Viewport(new Size(width, height));
         }
 
@@ -66,27 +69,14 @@ namespace AirHockey.Graphics
                 switch(visual.Effect)
                 {
                     case VertexColorEffect cce:
-                        Matrix3 worldViewMatrix1 = Camera.Transform * visual.WorldMatrix;
+                        Matrix3 worldViewMatrix1 = Camera.ProjectionMatrix * Camera.ViewMatrix * visual.WorldMatrix;
                         cce.WorldViewMatrix = worldViewMatrix1;
                         break;
                     case TextureEffect te:
-                        Matrix3 worldViewMatrix2 = Camera.Transform * visual.WorldMatrix;
+                        Matrix3 worldViewMatrix2 = Camera.ProjectionMatrix * Camera.ViewMatrix * visual.WorldMatrix;
                         te.WorldViewMatrix = worldViewMatrix2;
                         break;
-                    case VertexColorLightEffect vcle:
-                        Matrix3 worldViewMatrix3 = Camera.Transform * visual.WorldMatrix;
-                        vcle.WorldViewMatrix = worldViewMatrix3;
-                        vcle.WorldMatrix = visual.WorldMatrix;
-                        vcle.Lights = scene.Lights.ToArray();
-                        vcle.Ambient = scene.Ambient;
-                        break;
-                    case TextureLightEffect tle:
-                        Matrix3 worldViewMatrix4 = Camera.Transform * visual.WorldMatrix;
-                        tle.WorldViewMatrix = worldViewMatrix4;
-                        tle.WorldMatrix = visual.WorldMatrix;
-                        tle.Lights = scene.Lights.ToArray();
-                        tle.Ambient = scene.Ambient;
-                        break;
+
 
                 }
 
@@ -97,6 +87,9 @@ namespace AirHockey.Graphics
             }
 
             DrawShadows(scene);
+            lightBuffer.Camera = Camera;
+            lightBuffer.Draw();
+
         }
 
         void DrawShadows(Scene scene)
@@ -121,7 +114,7 @@ namespace AirHockey.Graphics
                         new Geometry(OpenTK.Graphics.OpenGL4.PrimitiveType.Triangles, shadow.Vertices, shadow.Colors, null, null);
 
                     ShadowEffect.Begin();
-                    ShadowEffect.WorldViewMatrix = Camera.Transform;
+                    ShadowEffect.WorldViewMatrix = Camera.ProjectionMatrix * Camera.ViewMatrix;
 
                     shadowGeometry.Draw();
 

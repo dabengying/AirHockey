@@ -42,14 +42,14 @@ namespace AirHockey
                 GeometryFactory.CreateBox(
                     new Box2(-Constants.tableWidth * 0.5f, Constants.tableHeight * 0.5f, 
                 Constants.tableWidth * 0.5f, -Constants.tableHeight * 0.5f)),
-                new TextureLightEffect("table.png"));
+                new TextureEffect("table.png"));
             puckGraphicsObject = new Visual(
                 GeometryFactory.CreateCircle(Constants.puckRadius, new Color4(1, 0, 0, 1)),
                  new VertexColorEffect());
             paddleGraphicsObjects = new Visual[2];
             paddleGraphicsObjects[0] = new Visual(
                 GeometryFactory.CreateCircle(Constants.paddleRadius, new Color4(1, 1, 1, 1)),
-                new VertexColorLightEffect());
+                new VertexColorEffect());
             paddleGraphicsObjects[1] = new Visual(
                 GeometryFactory.CreateCircle(Constants.paddleRadius, new Color4(1, 1, 1, 1)),
                 new VertexColorEffect());
@@ -126,8 +126,8 @@ namespace AirHockey
             Light light2 = new Light();
             light2.Position = gameFrame.Paddles[0].position;
             light2.Color = new Color4(1, 1, 1, 1);
-            light2.K = 0.4f;
-            light2.P = 3.0f;
+            //light2.K = 0.4f;
+            //light2.P = 3.0f;
             scene.AddLight(light2);
             scene.AddShadow(new Shadow(light2.Position, gameFrame.Puck.position, Constants.puckRadius));
         }

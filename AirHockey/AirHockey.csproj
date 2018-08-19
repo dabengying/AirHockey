@@ -50,16 +50,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI.cs" />
+    <Compile Include="Core\Color3.cs" />
     <Compile Include="Graphics\Animation.cs" />
     <Compile Include="AnimationState.cs" />
     <Compile Include="Core\Button.cs" />
-    <Compile Include="Core\Color.cs" />
+    <Compile Include="Core\Color4.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="GameFrame.cs" />
     <Compile Include="GameOverState.cs" />
     <Compile Include="Core\Input.cs" />
     <Compile Include="Graphics\Camera.cs" />
+    <Compile Include="Core\Line.cs" />
+    <Compile Include="Graphics\LightEffect.cs" />
     <Compile Include="Graphics\Shadow.cs" />
+    <Compile Include="Graphics\DeferredLighting.cs" />
     <Compile Include="Graphics\VertexColorEffect.cs" />
     <Compile Include="Graphics\Geometry.cs" />
     <Compile Include="Graphics\GeometryFactory.cs" />
@@ -67,8 +71,6 @@
     <Compile Include="Core\MathFunctions.cs" />
     <Compile Include="Graphics\Effect.cs" />
     <Compile Include="Graphics\TextureEffect.cs" />
-    <Compile Include="Graphics\TextureLightEffect.cs" />
-    <Compile Include="Graphics\VertexColorLightEffect.cs" />
     <Compile Include="Physics.cs" />
     <Compile Include="PlayingState.cs" />
     <Compile Include="Program.cs" />
@@ -87,14 +89,12 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shaders\light.psh" />
+    <Content Include="Shaders\light.vsh" />
     <Content Include="Shaders\texture.psh" />
     <Content Include="Shaders\texture.vsh" />
-    <Content Include="Shaders\textureLight.psh" />
-    <Content Include="Shaders\textureLight.vsh" />
-    <Content Include="Shaders\vertexColorLight.vsh" />
     <Content Include="Shaders\vertexColor.psh" />
     <Content Include="Shaders\vertexColor.vsh" />
-    <Content Include="Shaders\vertexColorLight.psh" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

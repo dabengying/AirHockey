@@ -80,9 +80,10 @@ namespace AirHockey
             VertexShaderId = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(VertexShaderId, VertexShader);
             GL.CompileShader(VertexShaderId);
-
+            CheckShader(VertexShaderId);
             return VertexShaderId;
         }
+
 
         public static int LoadFragmentShader(string name)
         {
@@ -107,8 +108,28 @@ namespace AirHockey
             FragmentShaderId = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(FragmentShaderId, FragmentShader);
             GL.CompileShader(FragmentShaderId);
-
+            CheckShader(FragmentShaderId);
             return FragmentShaderId;
+
+        }
+
+        static void CheckShader(int shaderId)
+        {
+            int isCompiled = 0;
+            GL.GetShader(shaderId, ShaderParameter.CompileStatus, out isCompiled);
+            if (isCompiled == 0)
+            {
+                int maxLength = 0;
+                GL.GetShader(shaderId, ShaderParameter.InfoLogLength, out maxLength);
+
+                // The maxLength includes the NULL character
+                StringBuilder infoLog = new StringBuilder(maxLength);
+                GL.GetShaderInfoLog(shaderId, maxLength, out maxLength, infoLog);
+                Console.WriteLine(infoLog);
+
+                GL.DeleteShader(shaderId);
+                return;
+            }
 
         }
 

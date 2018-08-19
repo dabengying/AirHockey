@@ -16,15 +16,23 @@ namespace AirHockey.Graphics
         public float Width;
         public float Height;
 
-        public Matrix3 Transform
+        public Matrix3 ViewMatrix
         {
             get
             {
-                Matrix3 M = Matrix3.Identity;
-                M.M13 = -Position.X;
-                M.M23 = -Position.Y;
-                M = M * Matrix3.CreateRotationZ(-Angle) * Matrix3.CreateScale(2.0f / Width, 2.0f / Height, 1.0f);
-                return M;
+                Matrix3 translation = Matrix3.Identity;
+                translation.M13 = -Position.X;
+                translation.M23 = -Position.Y;
+                return translation * Matrix3.CreateRotationZ(-Angle);
+                
+            }
+        }
+
+        public Matrix3 ProjectionMatrix
+        {
+            get
+            {
+                return Matrix3.CreateScale(2.0f / Width, 2.0f / Height, 1.0f);
             }
         }
     }

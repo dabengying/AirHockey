@@ -1,0 +1,23 @@
+﻿
+#version 400
+
+
+uniform vec2 position;
+uniform vec4 color;
+uniform float radius;
+
+
+varying vec2 worldPosition;
+
+void main() {
+	float dist = length(worldPosition.xy - position);
+	float dOverR = dist / radius;
+	float dOverR4 = dOverR * dOverR * dOverR * dOverR;
+	float sqrtNumer = 1.0f - dOverR4;
+	float numer = clamp(sqrtNumer * sqrtNumer, 0.0, 1.0);
+	float denom = dist*dist + 1.0f;
+
+	float intensity = numer / denom;
+
+	gl_FragColor = intensity * color;
+}

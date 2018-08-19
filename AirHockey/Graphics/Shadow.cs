@@ -5,15 +5,18 @@ namespace AirHockey.Graphics
 {
     public class Shadow
     {
-        const float infty = 100;
-        float numbraFactor = 0.6f;
-        const float shadowAlpha = 0.20f;
-        const float shadowEdgeAlpha = shadowAlpha / 2.0f;
+
+        public Vector2[] Vertices
+        {
+            get;
+        }
+        public Color4[] Colors
+        {
+            get;
+        }
 
         public Shadow(Vector2 lightPosition, Vector2 circlePosition, float circleRadius)
         {
-
-
             Lines = TangentLineToCirleThroughPoint(lightPosition, circlePosition, circleRadius);
             if (Lines.Length >= 2)
             {
@@ -51,10 +54,16 @@ namespace AirHockey.Graphics
                 insideLine.Point = modifiedLines[1].Point;
                 insideLine.Direction = modifiedLines[1].Direction;
 
-                CreatePnumbraTrapeziod(insideLine, outsideLine, infty, 12);3
+                CreatePnumbraTrapeziod(insideLine, outsideLine, infty, 12);
             }
 
         }
+
+        Line[] Lines;
+        const float infty = 100;
+        float numbraFactor = 0.6f;
+        const float shadowAlpha = 0.20f;
+        const float shadowEdgeAlpha = shadowAlpha / 2.0f;
 
         void CreateUmbraTrapeziod(Line[] sides, float height, int start)
         {
@@ -89,11 +98,6 @@ namespace AirHockey.Graphics
             Colors[start + 4] = new Color4(0, 0, 0, 0.0f);
             Colors[start + 5] = new Color4(0, 0, 0, shadowEdgeAlpha);
         }
-
-        public Line[] Lines;
-
-        public Vector2[] Vertices;
-        public Color4[] Colors;
 
         Line[] TangentLineToCirleThroughPoint(Vector2 p, Vector2 c, float r)
         {
@@ -138,6 +142,9 @@ namespace AirHockey.Graphics
         }
     }
 
-    
+    class LightGeometry
+    {
+        Vector2 vertices;
+    }
 
 }

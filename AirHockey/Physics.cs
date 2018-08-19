@@ -12,53 +12,6 @@ namespace AirHockey
     }
 
 
-    class Shape
-    {
-    }
-
-    class Circle : Shape
-    {
-        Vector2 pos;
-        float r;
-    }
-
-    class AAHalfSpace : Shape
-    {
-        enum DirOpen { PosX, PosY, NegX, NegY };
-        float coord;
-    }
-
-    class Segment : Shape
-    {
-        Vector2 A, B;
-    }
-
-
-
-    class Collision
-    {
-        bool Test(Shape a, Shape b)
-        {
-            if ( a is Circle  && b is Circle )
-            {
-
-            }
-
-
-            return false;
-        }
-
-        bool Collide(Shape a, Shape b)//, ContactInfo info)
-        {
-            if ( a is Circle || b is Circle )
-            {
-                return true;
-            }
-            return false;
-        }
-    }
-
-
 
 
     class Physics
